@@ -1,0 +1,140 @@
+---
+swagger: '2.0'
+
+##### General #####
+info:
+  version: alpha
+  title: Apihooks API
+  description: |
+    All Apihooks apis are built on common principles defined in this document. The apis
+    themselves are meant to have a predictable request and response schema. Please read
+    this document thoroughly before you get started.
+
+    To get started, signup at https://apihookshq.com.
+
+    ## Structure
+
+    This is a RESTful, json only api. Allowed verbs are `GET`, `POST`, `PUT` and `DELETE`
+    All `GET` requests return a response body. When successful, `PUT` and `DELETE` requests
+    will return `200`, but NO repsonse body. `POST` responses optionally return a body.
+
+    All successful response bodies follow the same following structure:
+
+    ```json
+    {
+        "data": { }
+    }
+    ```
+
+    `data` field will contain the response requested from the api. It can be either an object
+    or an array depending on request. For example `GET /users` will return an array of users:
+
+    ```json
+    # just an example
+    {
+        "data": [
+            { "username" : "me" },
+            { "username" : "others" }
+        ]
+    }
+    ```
+
+    While `GET /users/me` will return an object. Each endpoint will always return the same type.
+
+    ```json
+    {
+        "data": { "username" : "me" }
+    }
+    ```
+
+    When a request results in an error, this structure is optionally returned. For example if
+    request fails due to missing paramter response will look like:
+
+    ```json
+    {
+        "errors": [
+            { "error" : "Username is required." }
+        ]
+    }
+    ```
+
+    Each error will have an `error` field which describes the error in detail. Consult each
+    api documentation for list of errors.
+
+    ## Http Codes
+
+    This api uses HTTP codes to indicate status of request. For example `200` request means
+    the request was successful, while `400` indicates there was a problem with request. This
+    approach was chosen in contrast to always returning `200` and embedding the error in the
+    body of request.
+
+    These are all the http code that will returned by the api:
+
+     200 - OK. Everything is A-OK.
+     400 - Bad Request. Missing or invalid parameters.
+     401 - Unauthorized. Missing token in header or token not authorized/expired.
+     404 - Not Found. Requested resource was not found.
+     429 - Too many requests.
+     50* - Server error. Our bad.
+
+    ## Versioning
+
+    Versions are prefixed to the api endpoint. For example in `abuse.apihookshq.com/alpha`:
+
+      abuse - name of the api
+      alpha - version of api
+
+    alpha - while in development all apis will be in alpha version. This is equivalent to
+    it being in `0.*` version. The word alpha was chosen to explicity indicate to NOT use
+    it in production. This version will be highly in flux.
+
+    When out of alpha, version will bumped to `0.1` version. This can be thought of as the
+    `beta` version. When a backward incompatible API change happens, minor version number
+    will be bumped, ie from `0.1` to `0.2`.
+
+    When the api is ready to be used in production version will be bumped to `1.0`. This
+    indicates the api is stable.
+
+    Backwards compatible changes, bug fixes and new endpoints will NOT result in version
+    changes. It is highly recommended you stay on the latest version since older versions
+    will be deprecated and removed from existence soon after.
+
+    ## Authentication
+
+    You must authenticate all requests by passing token to http basic auth as username. You
+    can manage your token from your account. These keys are specific only to you so be sure
+    to keep them secret.
+
+    ## Rate limiting
+
+    TODO: rate limits per time period (hourly) and per payment plan.
+
+    ## Pagination
+
+    TODO: how to deal with pagination?
+
+    ## Resources
+
+    https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md
+    https://stripe.com/docs/api
+    http://tools.ietf.org/html/rfc7231#section-6
+    http://semver.org
+    https://news.ycombinator.com/item?id=8155601
+
+host: '*.apihookshq.com'
+basePath: /alpha
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+
+##### Security #####
+securityDefinitions:
+  key:
+    type: apiKey
+    in: header
+    name: key
+security:
+  - key: []

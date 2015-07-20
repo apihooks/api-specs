@@ -1,0 +1,348 @@
+---
+swagger: '2.0'
+
+info:
+  version: alpha
+  title: Apihooks users API
+  description: |
+    This is the alpha version of Apihooks abuse api. The goal of this api is to provide tools to
+    detect and prevent abuse of `users-auth` api.
+
+    See https://github.com/apihooks/apis for more general principles of Apihooks apis.
+
+    TODO:
+      support blocking of countries by IP
+      support throttling of IPs and email domains
+
+##### General #####
+host: abuse.apihookshq.com
+basePath: /alpha
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+
+##### Security #####
+securityDefinitions:
+  key:
+    type: apiKey
+    in: header
+    name: token
+security:
+  - key: []
+
+##### Params #####
+parameters:
+  username:
+    name: username
+    in: path
+    description: Unique identifier for an user.
+    type: string
+  domain:
+    name: domain
+    in: path
+    type: string
+  ipaddress:
+    name: ipaddress
+    in: path
+    type: string
+
+##### Paths #####
+paths:
+  /abusive:
+    get:
+      security:
+        - key: []
+      description: Checks if user matches one or more of specified blacklists.
+      parameters:
+        - in: formData
+          name: username
+          required: true
+          type: string
+        - in: formData
+          name: email
+          required: true
+          type: string
+        - in: formData
+          name: fromIpAddress
+          description: IPv4 or IPv6 address users signed up from.
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Result'
+        400:
+          description: Bad request.
+          schema:
+            $ref: '#/definitions/Error'
+
+##### EmailDomains #####
+  /emaildomains:
+    get:
+      security:
+        - key: []
+      description: Get list of email domains used by users to signup.
+      parameters:
+        - name: createdAt
+          description: Filter by date. Ranges are currently not supported.
+          in: query
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                $ref: '#/definitions/EmailDomain'
+
+  /emaildomains/{domain}/users:
+    parameters:
+      - $ref: '#/parameters/domain'
+    get:
+      security:
+        - key: []
+      description: Get list of users who signed up with email domain in query.
+      parameters:
+        - name: createdAt
+          in: query
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                $ref: '#/definitions/User'
+
+  /emaildomains/{domain}/block:
+    parameters:
+      - $ref: '#/parameters/domain'
+    put:
+      security:
+        - key: []
+      description: Block email domain.
+      responses:
+        200:
+          description: OK
+
+  /emaildomains/{domain}/unblock:
+    parameters:
+      - $ref: '#/parameters/domain'
+    put:
+      security:
+        - key: []
+      description: Unblock email domain.
+      responses:
+        200:
+          description: OK
+
+##### Ipaddress #####
+  /ipaddresses:
+    get:
+      security:
+        - key: []
+      description: Get list of ip addresses used by users to signup.
+      parameters:
+        - name: createdAt
+          in: query
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                $ref: '#/definitions/IpAddress'
+
+  /ipaddresses/{ipaddress}/users:
+    parameters:
+      - $ref: '#/parameters/ipaddress'
+    get:
+      security:
+        - key: []
+      description: Get list of users who signed up with ip address in query.
+      parameters:
+        - name: createdAt
+          in: query
+          type: string
+          format: date-time
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                $ref: '#/definitions/User'
+
+  /ipaddresses/{ipaddress}/block:
+    parameters:
+      - $ref: '#/parameters/ipaddress'
+    put:
+      security:
+        - key: []
+      description: Block ip address.
+      responses:
+        200:
+          description: OK
+
+  /ipaddresses/{ipaddress}/unblock:
+    parameters:
+      - $ref: '#/parameters/ipaddress'
+    put:
+      security:
+        - key: []
+      description: Unblock ip address.
+      responses:
+        200:
+          description: OK
+
+##### Users #####
+  /users:
+    post:
+      security:
+        - key: []
+      description: Add new user.
+      parameters:
+        - in: formData
+          name: username
+          required: true
+          type: string
+        - in: formData
+          name: firstName
+          required: false
+          type: string
+        - in: formData
+          name: lastName
+          required: false
+          type: string
+        - in: formData
+          name: email
+          required: true
+          type: string
+        - in: formData
+          name: fromIpAddress
+          description: IPv4 or IPv6 address users signed up from.
+          required: true
+          type: string
+        - in: formData
+          name: createdAt
+          required: true
+          type: string
+          format: date-time
+        - in: formData
+          name: userAgent
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/User'
+        400:
+          description: Bad request.
+          schema:
+            $ref: '#/definitions/Error'
+
+  /users/{username}:
+    parameters:
+      - $ref: '#/parameters/username'
+    get:
+      security:
+        - key: []
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/User'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      security:
+        - key: []
+      responses:
+        200:
+          description: OK.
+        404:
+          description: Not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+##### Definitions #####
+definitions:
+  Result:
+    type: object
+    properties:
+      canRegister:
+        type: boolean
+      reason:
+        type: string
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      fromIpAddress:
+        type: string
+      userAgent:
+        type: string
+      createdAt:
+        type: string
+        format: date-time
+  EmailDomain:
+    type: object
+    properties:
+      name:
+        type: string
+      count:
+        type: integer
+      date:
+        type: string
+        format: date
+  IpAddress:
+    type: object
+    properties:
+      name:
+        type: string
+      count:
+        type: integer
+      date:
+        type: string
+        format: date
+  Error:
+    type: array
+    items:
+      properties:
+        error:
+          type: string
