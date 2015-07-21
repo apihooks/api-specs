@@ -6,7 +6,9 @@ info:
   title: Apihooks users API
   description: |
     This is the alpha version of Apihooks abuse api. The goal of this api is to provide tools to
-    detect and prevent abuse of `users-auth` api.
+    detect and prevent abuse of `users` api.
+
+    To get started, register your app at https://apihookshq.com.
 
     See https://github.com/apihooks/apis for more general principles of Apihooks apis.
 
@@ -33,7 +35,7 @@ securityDefinitions:
 security:
   - key: []
 
-##### Params #####
+##### Parameters #####
 parameters:
   username:
     name: username
@@ -77,7 +79,7 @@ paths:
             type: object
             properties:
               data:
-                $ref: '#/definitions/Result'
+                $ref: '#/definitions/Abusive'
         400:
           description: Bad request.
           schema:
@@ -295,10 +297,10 @@ paths:
 
 ##### Definitions #####
 definitions:
-  Result:
+  Abusive:
     type: object
     properties:
-      canRegister:
+      blacklisted:
         type: boolean
       reason:
         type: string
@@ -341,8 +343,7 @@ definitions:
         type: string
         format: date
   Error:
-    type: array
-    items:
-      properties:
-        error:
-          type: string
+    type: object
+    properties:
+      error:
+        type: string
