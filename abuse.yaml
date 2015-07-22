@@ -107,6 +107,20 @@ paths:
                 type: array
                 $ref: '#/definitions/EmailDomain'
 
+  /emaildomains/isblocked:
+    get:
+      security:
+        - key: []
+      description: Checks if email domain is blocked.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+
   /emaildomains/{domain}/users:
     parameters:
       - $ref: '#/parameters/domain'
@@ -171,6 +185,20 @@ paths:
               data:
                 type: array
                 $ref: '#/definitions/IpAddress'
+
+  /ipaddresses/isblocked:
+    get:
+      security:
+        - key: []
+      description: Checks if ip address is blocked.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
 
   /ipaddresses/{ipaddress}/users:
     parameters:
