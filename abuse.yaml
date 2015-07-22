@@ -3,7 +3,7 @@ swagger: '2.0'
 
 info:
   version: alpha
-  title: Apihooks users API
+  title: Apihooks abuse API
   description: |
     This is the alpha version of Apihooks abuse api. The goal of this api is to provide tools to
     detect and prevent abuse of `users` api.
@@ -119,7 +119,7 @@ paths:
             type: object
             properties:
               data:
-                type: object
+                $ref: '#/definitions/Blocked'
 
   /emaildomains/{domain}/users:
     parameters:
@@ -199,6 +199,7 @@ paths:
             properties:
               data:
                 type: object
+                $ref: '#/definitions/Blocked'
 
   /ipaddresses/{ipaddress}/users:
     parameters:
@@ -256,14 +257,6 @@ paths:
           required: true
           type: string
         - in: formData
-          name: firstName
-          required: false
-          type: string
-        - in: formData
-          name: lastName
-          required: false
-          type: string
-        - in: formData
           name: email
           required: true
           type: string
@@ -277,10 +270,6 @@ paths:
           required: true
           type: string
           format: date-time
-        - in: formData
-          name: userAgent
-          required: true
-          type: string
       responses:
         200:
           description: OK
@@ -337,15 +326,9 @@ definitions:
     properties:
       username:
         type: string
-      firstName:
-        type: string
-      lastName:
-        type: string
       email:
         type: string
       fromIpAddress:
-        type: string
-      userAgent:
         type: string
       createdAt:
         type: string
@@ -370,6 +353,11 @@ definitions:
       date:
         type: string
         format: date
+  Blocked:
+    type: object
+    properties:
+      isBlocked:
+        type: boolean
   Error:
     type: object
     properties:
