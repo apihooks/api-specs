@@ -37,19 +37,15 @@ security:
 
 ##### Parameters #####
 parameters:
-  username:
-    name: username
-    in: path
-    description: Unique identifier for an user.
-    type: string
   domain:
     name: domain
     in: path
     type: string
-  ipaddress:
-    name: ipaddress
+  ip:
+    name: ip
     in: path
     type: string
+
 
 ##### Paths #####
 paths:
@@ -59,10 +55,6 @@ paths:
         - key: []
       description: Checks if user matches one or more of specified blacklists.
       parameters:
-        - in: formData
-          name: username
-          required: true
-          type: string
         - in: formData
           name: email
           required: true
@@ -85,54 +77,38 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+
+##### Settings #####
+  /settings:
+    get:
+      security:
+        - key: []
+      description: Returns user settings for api.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Settings'
+    put:
+      security:
+        - key: []
+      description: Update user settings.
+      responses:
+        200:
+          description: OK
+
+
 ##### EmailDomains #####
-  /emaildomains:
-    get:
-      security:
-        - key: []
-      description: Get list of email domains used by users to signup.
-      parameters:
-        - name: createdAt
-          description: Filter by date. Ranges are currently not supported.
-          in: query
-          type: string
-          format: date-time
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                type: array
-                $ref: '#/definitions/EmailDomain'
-
-  /emaildomains/isblocked:
-    get:
-      security:
-        - key: []
-      description: Checks if email domain is blocked.
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                $ref: '#/definitions/Blocked'
-
-  /emaildomains/{domain}/users:
+  /emaildomains/{domain}:
     parameters:
       - $ref: '#/parameters/domain'
     get:
       security:
         - key: []
-      description: Get list of users who signed up with email domain in query.
-      parameters:
-        - name: createdAt
-          in: query
-          type: string
-          format: date-time
+      description: Returns status of email, i.e. is it whitelisted or blacklisted.
       responses:
         200:
           description: OK
@@ -140,177 +116,98 @@ paths:
             type: object
             properties:
               data:
-                type: array
-                $ref: '#/definitions/User'
+                $ref: '#/definitions/Status'
 
-  /emaildomains/{domain}/block:
+  /emaildomains/{domain}/blacklist:
     parameters:
       - $ref: '#/parameters/domain'
     put:
       security:
         - key: []
-      description: Block email domain.
+      description: Add domain to list of blacklists.
       responses:
         200:
           description: OK
-
-  /emaildomains/{domain}/unblock:
-    parameters:
-      - $ref: '#/parameters/domain'
-    put:
-      security:
-        - key: []
-      description: Unblock email domain.
-      responses:
-        200:
-          description: OK
-
-##### Ipaddress #####
-  /ipaddresses:
-    get:
-      security:
-        - key: []
-      description: Get list of ip addresses used by users to signup.
-      parameters:
-        - name: createdAt
-          in: query
-          type: string
-          format: date-time
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                type: array
-                $ref: '#/definitions/IpAddress'
-
-  /ipaddresses/isblocked:
-    get:
-      security:
-        - key: []
-      description: Checks if ip address is blocked.
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                type: object
-                $ref: '#/definitions/Blocked'
-
-  /ipaddresses/{ipaddress}/users:
-    parameters:
-      - $ref: '#/parameters/ipaddress'
-    get:
-      security:
-        - key: []
-      description: Get list of users who signed up with ip address in query.
-      parameters:
-        - name: createdAt
-          in: query
-          type: string
-          format: date-time
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                type: array
-                $ref: '#/definitions/User'
-
-  /ipaddresses/{ipaddress}/block:
-    parameters:
-      - $ref: '#/parameters/ipaddress'
-    put:
-      security:
-        - key: []
-      description: Block ip address.
-      responses:
-        200:
-          description: OK
-
-  /ipaddresses/{ipaddress}/unblock:
-    parameters:
-      - $ref: '#/parameters/ipaddress'
-    put:
-      security:
-        - key: []
-      description: Unblock ip address.
-      responses:
-        200:
-          description: OK
-
-##### Users #####
-  /users:
-    post:
-      security:
-        - key: []
-      description: Add new user.
-      parameters:
-        - in: formData
-          name: username
-          required: true
-          type: string
-        - in: formData
-          name: email
-          required: true
-          type: string
-        - in: formData
-          name: fromIpAddress
-          description: IPv4 or IPv6 address users signed up from.
-          required: true
-          type: string
-        - in: formData
-          name: createdAt
-          required: true
-          type: string
-          format: date-time
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                $ref: '#/definitions/User'
-        400:
-          description: Bad request.
-          schema:
-            $ref: '#/definitions/Error'
-
-  /users/{username}:
-    parameters:
-      - $ref: '#/parameters/username'
-    get:
-      security:
-        - key: []
-      responses:
-        200:
-          description: OK
-          schema:
-            type: object
-            properties:
-              data:
-                $ref: '#/definitions/User'
-        404:
-          description: Not found
-          schema:
-            $ref: '#/definitions/Error'
     delete:
       security:
         - key: []
+      description: Remove domain from list of blacklists.
       responses:
         200:
-          description: OK.
-        404:
-          description: Not found.
+          description: OK
+
+  /emaildomains/{domain}/whitelist:
+    parameters:
+      - $ref: '#/parameters/domain'
+    put:
+      security:
+        - key: []
+      description: Add domain to list of whitelists.
+      responses:
+        200:
+          description: OK
+    delete:
+      security:
+        - key: []
+      description: Remove domain from list of whitelists.
+      responses:
+        200:
+          description: OK
+
+
+##### IpAddresses #####
+  /ipaddress/{ip}:
+    parameters:
+      - $ref: '#/parameters/ip'
+    get:
+      security:
+        - key: []
+      description: Returns status of ipaddres, i.e. is it whitelisted or blacklisted.
+      responses:
+        200:
+          description: OK
           schema:
-            $ref: '#/definitions/Error'
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/Status'
+
+  /ipaddress/{ip}/blacklist:
+    parameters:
+      - $ref: '#/parameters/ip'
+    put:
+      security:
+        - key: []
+      description: Add ip to list of blacklists.
+      responses:
+        200:
+          description: OK
+    delete:
+      security:
+        - key: []
+      description: Remove ip from list of blacklists.
+      responses:
+        200:
+          description: OK
+
+  /ipaddress/{ip}/whitelist:
+    parameters:
+      - $ref: '#/parameters/ip'
+    put:
+      security:
+        - key: []
+      description: Add ip to list of whitelists.
+      responses:
+        200:
+          description: OK
+    delete:
+      security:
+        - key: []
+      description: Remove ip from list of whitelists.
+      responses:
+        200:
+          description: OK
+
 
 ##### Definitions #####
 definitions:
@@ -321,42 +218,23 @@ definitions:
         type: boolean
       reason:
         type: string
-  User:
+  Status:
     type: object
     properties:
-      username:
+      status:
         type: string
-      email:
-        type: string
-      fromIpAddress:
-        type: string
-      createdAt:
-        type: string
-        format: date-time
-  EmailDomain:
+  Settings:
     type: object
     properties:
-      name:
-        type: string
-      count:
-        type: integer
-      date:
-        type: string
-        format: date
-  IpAddress:
-    type: object
-    properties:
-      name:
-        type: string
-      count:
-        type: integer
-      date:
-        type: string
-        format: date
-  Blocked:
-    type: object
-    properties:
-      isBlocked:
+      blockAbusiveDomains:
+        type: boolean
+      blockAbusiveIps:
+        type: boolean
+      blockSubdomains:
+        type: boolean
+      blockRedirects:
+        type: boolean
+      blockUnreachables:
         type: boolean
   Error:
     type: object
